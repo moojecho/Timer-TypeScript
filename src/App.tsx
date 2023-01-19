@@ -48,21 +48,26 @@ function App() {
     setStartToggle(!startToggle);
   };
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      if (stopToggle || seconds===0) {
-      console.log(stopToggle);
-      setStartToggle(false);
-      clearInterval(timer);
-    }
-      if (startToggle) {
-        setSeconds(value => value - 1);
-        console.log(seconds);
-      }
+  useInterval(()=>{
+    setSeconds(seconds+1);
+    console.log(seconds);
+  },1000);
+
+  // useEffect(() => {
+  //   const timer = setInterval(() => {
+  //     if (stopToggle || seconds===0) {
+  //     console.log(stopToggle);
+  //     setStartToggle(false);
+  //     clearInterval(timer);
+  //   }
+  //     if (startToggle) {
+  //       setSeconds(value => value - 1);
+  //       console.log(seconds);
+  //     }
       
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [startToggle, stopToggle]);
+  //   }, 1000);
+  //   return () => clearInterval(timer);
+  // }, [startToggle, stopToggle]);
 
   return (
     <div className="App">
