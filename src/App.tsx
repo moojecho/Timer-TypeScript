@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import styled from "styled-components";
 
 function App() {
   const minutesRef = useRef<HTMLInputElement>(null);
@@ -8,81 +9,147 @@ function App() {
   const [minutes, setMinutes] = useState<number>(0);
   const [seconds, setSeconds] = useState<number>(0);
 
-  console.log(secondsRef.current?.value);
-
-
-  function useInterval(callback: ()=>void, delay:number) {
+  const useInterval = (callback: () => void, delay: number) => {
     const savedCallback = useRef<(() => void) | null>();
-  
+
     useEffect(() => {
       savedCallback.current = callback;
     }, [callback]);
-  
+
     useEffect(() => {
       function tick() {
-        if(savedCallback.current){
+        if (savedCallback.current) {
           savedCallback.current();
         }
       }
       if (delay !== null) {
         let id = setInterval(tick, delay);
+        if ((!seconds && !minutes) || stopToggle) {
+          clearInterval(id);
+        }
         return () => clearInterval(id);
       }
-    }, [delay]);
-  }
-
-
-
-  const changeMinutes = () => {
-    if (startToggle === false) {
-      if (secondsRef.current) {
-        setSeconds(Number(secondsRef.current.value));
+    }, [delay, startToggle, stopToggle]);
+  };
+  //start button 기능
+  const startTimer = () => {
+    if (!startToggle && !stopToggle) {
+      if (secondsRef.current || minutesRef.current) {
+        setSeconds(Number(secondsRef.current?.value));
+        setMinutes(Number(minutesRef.current?.value));
       }
       setStartToggle(true);
-      console.log(startToggle);
     }
   };
 
+  //stop button 기능
   const stopTimer = () => {
-    setStopToggle(!stopToggle);
-    setStartToggle(!startToggle);
+    if (seconds || minutes) {
+      setStopToggle(!stopToggle);
+      setStartToggle(!startToggle);
+    }
   };
 
-  useInterval(()=>{
-    setSeconds(seconds+1);
-    console.log(seconds);
-  },1000);
+  //reset button 기능
+  const resetTimer = () => {
+    setStopToggle(false);
+    setStartToggle(false);
+    setSeconds(0);
+    setMinutes(0);
+  };
 
-  // useEffect(() => {
-  //   const timer = setInterval(() => {
-  //     if (stopToggle || seconds===0) {
-  //     console.log(stopToggle);
-  //     setStartToggle(false);
-  //     clearInterval(timer);
-  //   }
-  //     if (startToggle) {
-  //       setSeconds(value => value - 1);
-  //       console.log(seconds);
-  //     }
-      
-  //   }, 1000);
-  //   return () => clearInterval(timer);
-  // }, [startToggle, stopToggle]);
+  //useInterval 사용 -> timer 기능
+  useInterval(() => {
+    if (startToggle) {
+      setSeconds(seconds - 1);
+      if (!seconds && minutes > 0) {
+        setMinutes(minutes - 1);
+        setSeconds(59);
+      } else if (!seconds && !minutes) {
+        resetTimer();
+      }
+    }
+  }, 1000);
 
   return (
-    <div className="App">
-      <div style={{ display: "flex" }}>
-        <input type="number" ref={minutesRef} />
-        <p>minutes</p>
-        <input type="number" ref={secondsRef} />
-        <p>seconds</p>
-        <button onClick={changeMinutes}>Start</button>
-        <button onClick={stopTimer}>Pause/restart</button>
-        <button>Reset</button>
-      </div>
-      <h1>00:00</h1>
-    </div>
+    <Layout className="App">
+      <TimerLayout>
+        <InputLayout style={{ display: "flex" }}>
+          <InputDesign type="number" ref={minutesRef} placeholder={"minutes"} />
+          <InputDesign type="number" ref={secondsRef} placeholder={"seconds"} />
+        </InputLayout>
+        <ButtonLayout>
+          <ButtonDesign onClick={startTimer}>Start</ButtonDesign>
+          <ButtonDesign onClick={stopTimer}>Pause/restart</ButtonDesign>
+          <ButtonDesign onClick={resetTimer}>Reset</ButtonDesign>
+        </ButtonLayout>
+        <TimerDesign>
+          {startToggle || stopToggle
+            ? `${
+                Math.floor(minutes / 10) === 0 ? `0${minutes}` : `${minutes}`
+              }:${
+                Math.floor(seconds / 10) === 0 ? `0${seconds}` : `${seconds}`
+              }`
+            : "00:00"}
+        </TimerDesign>
+      </TimerLayout>
+    </Layout>
   );
 }
 
 export default App;
+const Layout = styled.div`
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const TimerLayout = styled.div`
+  width: 25vw;
+  min-width: 350px;
+  min-height: 350px;
+  height: 25vw;
+  border: none;
+  border-radius: 10%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #3178c6;
+`;
+
+const InputLayout = styled.div`
+  width: 22vw;
+  margin-top: 30px;
+`;
+
+const InputDesign = styled.input`
+  width: 10vw;
+  height: 3vw;
+  border: none;
+  border-radius: 20px;
+  margin: auto;
+`;
+
+const ButtonLayout = styled.div`
+  width: 20vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px;
+`;
+
+const ButtonDesign = styled.button`
+  width: 5vw;
+  height: 2vw;
+  border: none;
+  border-radius: 4px;
+  margin: auto;
+  overflow: hidden;
+  text-align: center;
+`;
+
+const TimerDesign = styled.p`
+  font-size: 50px;
+  font-weight: bold;
+`;
