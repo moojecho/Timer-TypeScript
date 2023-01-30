@@ -124,11 +124,12 @@ const InputLayout = styled.div`
 `;
 
 const InputDesign = styled.input`
-  width: 10vw;
+  width: 8vw;
   height: 3vw;
   border: none;
-  border-radius: 20px;
+  border-radius: 20vw;
   margin: auto;
+  padding-left: 10px;
 `;
 
 const ButtonLayout = styled.div`
